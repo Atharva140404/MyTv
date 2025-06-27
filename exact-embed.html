@@ -1,0 +1,115 @@
+<select id="categorySelect">
+  <option value="">Select a category</option>
+  <!-- other categories -->
+</select>
+<input type="text" id="youtubeUrl" placeholder="Paste YouTube URL" />
+<button onclick="addVideo()">Add Video</button>
+<p id="status"></p>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+<script src="script.js"></script>
+<script>
+  // Initialize the category dropdown when the page loads
+  document.addEventListener('DOMContentLoaded', function() {
+    // Wait for Supabase to load
+    let attempts = 0;
+    const maxAttempts = 50; // 5 seconds max wait
+    
+    function initializeCategories() {
+      if (window.supabaseLoaded || attempts >= maxAttempts) {
+        updateCategoryDropdown();
+      } else {
+        attempts++;
+        setTimeout(initializeCategories, 100);
+      }
+    }
+    
+    initializeCategories();
+  });
+  
+  // Function to add a video
+  function addVideo() {
+    const categorySelect = document.getElementById('categorySelect');
+    const youtubeUrl = document.getElementById('youtubeUrl');
+    const status = document.getElementById('status');
+    
+    // Reset status
+    status.textContent = '';
+    
+    // Validate inputs
+    if (!categorySelect.value) {
+      status.textContent = 'Please select a category';
+      return;
+    }
+    
+    if (!youtubeUrl.value.trim()) {
+      status.textContent = 'Please enter a YouTube URL';
+      return;
+    }
+    
+    // Set form values for the existing script.js function
+    titleInput = "";
+    urlInput = youtubeUrl.value.trim();
+    authorInput = "";
+    selectedCategoryId = categorySelect.value;
+    
+    // Call the handleSubmit function from script.js
+    handleSubmit().then(() => {
+      youtubeUrl.value = "";
+      status.textContent = 'Video added successfully!';
+    }).catch(error => {
+      status.textContent = 'Error adding video: ' + error.message;
+    });
+  }
+  
+  // Function to update the category dropdown
+  function updateCategoryDropdown() {
+    const categorySelect = document.getElementById('categorySelect');
+    const status = document.getElementById('status');
+    
+    if (!categorySelect) {
+      console.error("Category select element not found");
+      if (status) status.textContent = "Error: Category dropdown not found";
+      return;
+    }
+    
+    // Clear existing options except the first placeholder
+    while (categorySelect.options.length > 1) {
+      categorySelect.remove(1);
+    }
+    
+    // Get Supabase instance from script.js
+    if (!window.supabase) {
+      console.error("Supabase client not initialized");
+      if (status) status.textContent = "Error: Database connection not initialized";
+      return;
+    }
+    
+    // Fetch categories from Supabase
+    window.supabase
+      .from("categories")
+      .select("id, name")
+      .then(({ data, error }) => {
+        if (error) {
+          console.error("Error fetching categories:", error);
+          if (status) status.textContent = "Error loading categories: " + error.message;
+          return;
+        }
+        
+        if (!data || data.length === 0) {
+          console.log("No categories found");
+          if (status) status.textContent = "No categories found. Please create some first.";
+          return;
+        }
+        
+        data.forEach(category => {
+          const option = document.createElement("option");
+          option.value = category.id;
+          option.textContent = category.name;
+          categorySelect.appendChild(option);
+        });
+        
+        console.log("Loaded " + data.length + " categories");
+      });
+  }
+</script> 

@@ -1,0 +1,191 @@
+<!-- YouTube Video Form -->
+<div class="form-container">
+  <div class="form-group">
+    <label for="categorySelect">Select Category:</label>
+    <select id="categorySelect">
+      <option value="">Select a category</option>
+      <!-- Categories will be populated dynamically -->
+    </select>
+  </div>
+  
+  <div class="form-group">
+    <label for="youtubeUrl">YouTube URL:</label>
+    <input type="text" id="youtubeUrl" placeholder="Paste YouTube URL" />
+  </div>
+  
+  <button onclick="addVideo()">Add Video</button>
+  
+  <hr style="margin: 20px 0; border: 0; border-top: 1px solid #ddd;" />
+  
+  <h3>Search YouTube</h3>
+  <div class="form-group">
+    <label for="searchQuery">Search Query:</label>
+    <input type="text" id="searchQuery" placeholder="Enter search terms" />
+  </div>
+  
+  <div class="form-group">
+    <label for="maxResults">Number of Results:</label>
+    <select id="maxResults">
+      <option value="10">10 videos</option>
+      <option value="15" selected>15 videos</option>
+      <option value="25">25 videos</option>
+      <option value="50">50 videos (maximum)</option>
+    </select>
+  </div>
+  
+  <button onclick="searchYouTube()">Search & Add Videos</button>
+  
+  <p id="status"></p>
+</div>
+
+<!-- Make sure to include Supabase JS and script.js -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+<script src="script.js"></script>
+
+<script>
+  // Initialize the category dropdown when the page loads
+  document.addEventListener('DOMContentLoaded', function() {
+    // Wait for Supabase to load
+    let attempts = 0;
+    const maxAttempts = 50; // 5 seconds max wait
+    
+    function initializeCategories() {
+      if (window.supabaseLoaded || attempts >= maxAttempts) {
+        updateCategoryDropdown();
+      } else {
+        attempts++;
+        setTimeout(initializeCategories, 100);
+      }
+    }
+    
+    initializeCategories();
+  });
+  
+  // Function to add a video
+  function addVideo() {
+    const categorySelect = document.getElementById('categorySelect');
+    const youtubeUrl = document.getElementById('youtubeUrl');
+    const status = document.getElementById('status');
+    
+    // Reset status
+    status.textContent = '';
+    status.className = '';
+    
+    // Validate inputs
+    if (!categorySelect.value) {
+      status.textContent = 'Please select a category';
+      status.className = 'error';
+      return;
+    }
+    
+    if (!youtubeUrl.value.trim()) {
+      status.textContent = 'Please enter a YouTube URL';
+      status.className = 'error';
+      return;
+    }
+    
+    // Set form values for the existing script.js function
+    titleInput = ""; // Will be fetched from YouTube metadata
+    urlInput = youtubeUrl.value.trim();
+    authorInput = ""; // Will be fetched from YouTube metadata
+    selectedCategoryId = categorySelect.value;
+    
+    // Call the handleSubmit function from script.js
+    handleSubmit().then(() => {
+      // Clear the form
+      youtubeUrl.value = "";
+      
+      // Show success message
+      status.textContent = 'Video added successfully!';
+      status.className = 'success';
+    }).catch(error => {
+      console.error('Error adding video:', error);
+      status.textContent = 'Error adding video: ' + error.message;
+      status.className = 'error';
+    });
+  }
+  
+  // Function to search YouTube and add videos
+  function searchYouTube() {
+    const categorySelect = document.getElementById('categorySelect');
+    const searchQuery = document.getElementById('searchQuery');
+    const maxResults = document.getElementById('maxResults');
+    const status = document.getElementById('status');
+    
+    // Reset status
+    status.textContent = '';
+    status.className = '';
+    
+    // Validate inputs
+    if (!categorySelect.value) {
+      status.textContent = 'Please select a category';
+      status.className = 'error';
+      return;
+    }
+    
+    if (!searchQuery.value.trim()) {
+      status.textContent = 'Please enter a search query';
+      status.className = 'error';
+      return;
+    }
+    
+    // Call the fetchYouTubeVideosAndSave function from script.js
+    status.textContent = 'Searching YouTube...';
+    status.className = 'info';
+    
+    fetchYouTubeVideosAndSave(
+      searchQuery.value.trim(),
+      categorySelect.value,
+      maxResults.value,
+      true,  // forceVaryResults
+      false  // allowDuplicates
+    ).then(() => {
+      // Clear the search query
+      searchQuery.value = "";
+      
+      // Show success message
+      status.textContent = 'Videos added successfully!';
+      status.className = 'success';
+    }).catch(error => {
+      console.error('Error searching YouTube:', error);
+      status.textContent = 'Error searching YouTube: ' + error.message;
+      status.className = 'error';
+    });
+  }
+  
+  // Function to update the category dropdown
+  function updateCategoryDropdown() {
+    const categorySelect = document.getElementById('categorySelect');
+    
+    // Clear existing options except the first placeholder
+    while (categorySelect.options.length > 1) {
+      categorySelect.remove(1);
+    }
+    
+    // Get Supabase instance from the global scope (set in script.js)
+    if (!window.supabase) {
+      console.error("Supabase client not initialized");
+      return;
+    }
+    
+    // Fetch categories from Supabase
+    window.supabase
+      .from("categories")
+      .select("id, name")
+      .then(({ data, error }) => {
+        if (error) {
+          console.error("Error fetching categories:", error);
+          return;
+        }
+        
+        if (data && data.length > 0) {
+          data.forEach(category => {
+            const option = document.createElement("option");
+            option.value = category.id;
+            option.textContent = category.name;
+            categorySelect.appendChild(option);
+          });
+        }
+      });
+  }
+</script> 

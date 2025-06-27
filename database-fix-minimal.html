@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyTV Database Simplification</title>
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            line-height: 1.6;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            color: #333;
+        }
+        h1, h2 {
+            color: #2563eb;
+        }
+        .status {
+            padding: 12px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+        .info {
+            background-color: #dbeafe;
+            color: #1e40af;
+        }
+        .error {
+            background-color: #fee2e2;
+            color: #b91c1c;
+        }
+        .success {
+            background-color: #dcfce7;
+            color: #166534;
+        }
+        .warning {
+            background-color: #fff7ed;
+            color: #9a3412;
+        }
+        pre {
+            background-color: #1f2937;
+            color: #f9fafb;
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+        }
+        button {
+            background-color: #2563eb;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-right: 10px;
+        }
+        button:hover {
+            background-color: #1d4ed8;
+        }
+        button.danger {
+            background-color: #dc2626;
+        }
+        button.danger:hover {
+            background-color: #b91c1c;
+        }
+        #sql-content {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+    </style>
+    
+    <!-- Supabase with onload event and fallback -->
+    <script>
+        // Track Supabase loading status
+        window.supabaseLoaded = false;
+        window.supabaseLoadError = false;
+
+        function onSupabaseLoad() {
+            window.supabaseLoaded = true;
+            console.log("Supabase script loaded!");
+        }
+
+        function onSupabaseError() {
+            window.supabaseLoadError = true;
+            console.error("Primary Supabase script failed to load, trying fallback...");
+
+            // Create fallback script
+            const fallbackScript = document.createElement("script");
+            fallbackScript.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js";
+            fallbackScript.onload = function() {
+                window.supabaseLoaded = true;
+                console.log("Fallback Supabase script loaded successfully!");
+            };
+            fallbackScript.onerror = function() {
+                console.error("Both Supabase script sources failed to load");
+            };
+
+            // Add to document
+            document.head.appendChild(fallbackScript);
+        }
+    </script>
+
+    <!-- Primary supabase script -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" onload="onSupabaseLoad()" onerror="onSupabaseError()"></script>
+</head>
+<body>
+    <h1>MyTV Database Simplification</h1>
+    
+    <div class="warning status">
+        <strong>Warning:</strong> This will simplify your video table structure by removing all columns except id, category_id, url, and created_at.
+        Make sure you have backed up your data before proceeding.
+    </div>
+    
+    <div id="status" class="status info">Initializing...</div>
+    
+    <h2>SQL Script to Run</h2>
+    <pre id="sql-content">Loading SQL script...</pre>
+    
+    <div style="margin-top: 20px;">
+        <button id="runSqlBtn" disabled>Run SQL Script</button>
+        <button onclick="window.location.href='database-check.html'">Back to Diagnostics</button>
+    </div>
+    
+    <div id="results" style="margin-top: 20px;"></div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const statusEl = document.getElementById('status');
+            const sqlContentEl = document.getElementById('sql-content');
+            const runSqlBtn = document.getElementById('runSqlBtn');
+            const resultsEl = document.getElementById('results');
+            
+            // Update status
+            function updateStatus(message, type = 'info') {
+                statusEl.textContent = message;
+                statusEl.className = `status ${type}`;
+            }
+            
+            // Show results
+            function showResults(title, details, type = 'info') {
+                resultsEl.innerHTML = `
+                    <div class="status ${type}">
+                        <h3>${title}</h3>
+                        <pre>${typeof details === 'object' ? JSON.stringify(details, null, 2) : details}</pre>
+                    </div>
+                `;
+            }
+            
+            try {
+                updateStatus('Initializing Supabase client...', 'info');
+                
+                // Wait for Supabase to load
+                let attempts = 0;
+                while (!window.supabaseLoaded && attempts < 50) {
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                    attempts++;
+                }
+                
+                if (!window.supabaseLoaded) {
+                    updateStatus('Failed to load Supabase client', 'error');
+                    showResults('Loading Error', 'Supabase client failed to load after waiting 5 seconds', 'error');
+                    return;
+                }
+                
+                // Initialize Supabase
+                const supabaseUrl = "https://nqkccargwpcsbygurmbd.supabase.co";
+                const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5xa2NjYXJnd3Bjc2J5Z3VybWJkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk4MDgzODgsImV4cCI6MjA2NTM4NDM4OH0.0jMAsYbpny4zy-aNMjGYlxbu4pXvPnqePXOwrJ1gF1w";
+                
+                const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+                updateStatus('Supabase client initialized', 'info');
+                
+                // Load SQL script
+                try {
+                    const response = await fetch('simplify-video-table.sql');
+                    if (!response.ok) {
+                        throw new Error(`Failed to load SQL script: ${response.status} ${response.statusText}`);
+                    }
+                    const sqlScript = await response.text();
+                    sqlContentEl.textContent = sqlScript;
+                    runSqlBtn.disabled = false;
+                } catch (error) {
+                    updateStatus('Failed to load SQL script', 'error');
+                    showResults('Error', error.message, 'error');
+                    return;
+                }
+                
+                // Set up run SQL button
+                runSqlBtn.addEventListener('click', async () => {
+                    try {
+                        updateStatus('Running SQL script...', 'info');
+                        runSqlBtn.disabled = true;
+                        
+                        // First backup the existing data
+                        const { data: backupData, error: backupError } = await supabase
+                            .from('video')
+                            .select('*');
+                            
+                        if (backupError) {
+                            throw new Error(`Failed to backup data: ${backupError.message}`);
+                        }
+                        
+                        // Store backup in localStorage
+                        localStorage.setItem('video_table_backup', JSON.stringify(backupData));
+                        
+                        // Run the SQL script
+                        const sqlScript = sqlContentEl.textContent;
+                        const { error } = await supabase.rpc('exec_sql', { sql: sqlScript });
+                        
+                        if (error) {
+                            throw new Error(`Failed to run SQL script: ${error.message}`);
+                        }
+                        
+                        updateStatus('Database structure simplified successfully!', 'success');
+                        showResults('Success', 'The video table has been simplified. Your application should now work with the minimal schema.', 'success');
+                        
+                        // Add restore button
+                        resultsEl.innerHTML += `
+                            <div style="margin-top: 20px;">
+                                <p>A backup of your data has been saved to your browser's local storage.</p>
+                                <button onclick="window.location.href='index.html'">Return to Application</button>
+                            </div>
+                        `;
+                    } catch (error) {
+                        updateStatus('Error running SQL script', 'error');
+                        showResults('Error', error.message, 'error');
+                        runSqlBtn.disabled = false;
+                    }
+                });
+                
+            } catch (error) {
+                updateStatus('Error initializing', 'error');
+                showResults('General Error', error, 'error');
+            }
+        });
+    </script>
+</body>
+</html> 

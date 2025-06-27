@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MyTV Admin</title>
+    <link rel="stylesheet" href="style.css" />
+    <!-- Tailwind CSS -->
+    <link href="./tailwind.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://rsms.me/inter/inter.css" />
+
+    <!-- Supabase with onload event and fallback -->
+    <script>
+      // Track Supabase loading status
+      window.supabaseLoaded = false;
+      window.supabaseLoadError = false;
+
+      function onSupabaseLoad() {
+        window.supabaseLoaded = true;
+        console.log("Supabase script loaded!");
+      }
+
+      function onSupabaseError() {
+        window.supabaseLoadError = true;
+        console.error(
+          "Primary Supabase script failed to load, trying fallback..."
+        );
+
+        // Create fallback script
+        const fallbackScript = document.createElement("script");
+        fallbackScript.src =
+          "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js";
+        fallbackScript.onload = function () {
+          window.supabaseLoaded = true;
+          console.log("Fallback Supabase script loaded successfully!");
+        };
+        fallbackScript.onerror = function () {
+          console.error("Both Supabase script sources failed to load");
+        };
+
+        // Add to document
+        document.head.appendChild(fallbackScript);
+      }
+    </script>
+
+    <!-- Primary supabase script -->
+    <script
+      src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
+      onload="onSupabaseLoad()"
+      onerror="onSupabaseError()"
+    ></script>
+
+    <!-- Alpine.js -->
+    <script
+      defer
+      src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"
+    ></script>
+    <style>
+      /* Additional override styles */
+      .content {
+        width: 100%;
+        max-width: 100%;
+        padding: 1rem;
+        box-sizing: border-box;
+      }
+      .url-container {
+        width: 100%;
+        max-width: 100%;
+        box-sizing: border-box;
+      }
+      #channelList {
+        width: 100%;
+        padding: 0;
+        margin: 0;
+      }
+      .url-item {
+        width: 100%;
+        margin: 0;
+        box-sizing: border-box;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <aside class="sidebar">
+        <div class="site-brand">
+          <div class="logo">MyTV</div>
+          <div id="sync-status" class="sync-status connected">
+            Database connected
+          </div>
+        </div>
+        <button id="addCategoryBtn">+ Add Category</button>
+        <button id="youtubeSearchSidebarBtn" class="youtube-search-btn" style="margin-top: 10px;">
+          🔍 Search YouTube Videos
+        </button>
+        <ul id="categoryList"></ul>
+      </aside>
+
+      <main class="content">
+        <h2 id="categoryTitle">Add or select a category</h2>
+        
+        <div class="url-container">
+          <ul id="channelList" class="urlList"></ul>
+        </div>
+
+        <button id="addChannelBtn" class="hidden">+ Add URL</button>
+      </main>
+    </div>
+
+    <div id="confirmDialog" class="confirm-dialog hidden">
+      <div class="dialog-content">
+        <p id="confirmMessage">Are you sure you want to delete this?</p>
+        <div class="dialog-actions">
+          <button id="cancelBtn" class="dialog-btn cancel-btn">Cancel</button>
+          <button id="confirmBtn" class="dialog-btn confirm-btn">Delete</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="debugPanel"></div>
+
+    <script src="script.js"></script>
+  </body>
+</html>

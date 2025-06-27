@@ -1,0 +1,792 @@
+@theme {
+  --font-sans: InterVariable, sans-serif;
+  --primary-color: #e86b5c;
+  --secondary-color: #9333ea;
+  --bg-dark: #1e1933;
+  --bg-card: #2d2a3e;
+  --text-light: #f8fafc;
+  --text-muted: #94a3b8;
+  --button-highlight: #4ade80; /* Adding a bright green color for buttons */
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-sans, system-ui, sans-serif);
+}
+
+body {
+  background-color: var(--bg-dark);
+  color: var(--text-light);
+}
+
+.container {
+  display: flex;
+  height: 100vh;
+  width: 100%;
+  max-width: 100%;
+}
+
+/* --- Sidebar --- */
+.sidebar {
+  width: 256px; /* w-64 */
+  background: #1e1933; /* Dark purple sidebar */
+  color: #ffffff;
+  padding: 1rem; /* p-4 */
+  display: flex;
+  flex-direction: column;
+  gap: 1rem; /* gap-4 */
+  border-right: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.site-brand {
+  text-align: center;
+  margin-bottom: 0.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.site-brand .logo {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: -0.5px;
+  background: linear-gradient(135deg, #e86b5c 30%, #9333ea 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.site-brand .tagline {
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.6);
+  font-weight: 400;
+  margin-top: 0.1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.sidebar button {
+  width: 100%;
+  padding: 0.5rem 1rem; /* py-2 px-4 */
+  border: none;
+  border-radius: 0.5rem; /* rounded-lg */
+  background: var(--primary-color);
+  color: #ffffff;
+  cursor: pointer;
+  text-align: center;
+  transition: background 0.2s;
+  font-weight: 500;
+}
+
+.sidebar button:hover {
+  background: var(--secondary-color);
+  transform: translateY(-1px);
+}
+
+.category-item {
+  width: 100%;
+  padding: 0.5rem 1rem; /* py-2 px-4 */
+  border: none;
+  border-radius: 0.5rem; /* rounded-lg */
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-bottom: 0.5rem; /* gap-2 between items */
+}
+
+.category-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-light);
+}
+
+.category-item.active {
+  background: rgba(232, 107, 92, 0.2);
+  color: #e86b5c;
+  font-weight: 500;
+}
+
+#categoryList {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem; /* gap-2 */
+  overflow-y: auto;
+  flex: 1;
+}
+
+/* Category item with actions */
+.category-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.category-name {
+  cursor: pointer;
+  flex-grow: 1;
+}
+
+.category-actions {
+  display: flex;
+  gap: 5px;
+}
+
+.action-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.2s;
+  opacity: 0.9;
+  padding: 0;
+}
+
+.action-btn:hover {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+.edit-btn svg {
+  fill: #a3a3ff;
+  width: 16px;
+  height: 16px;
+}
+
+.delete-btn svg {
+  fill: #ff8080;
+  width: 16px;
+  height: 16px;
+}
+
+.category-item.active .edit-btn svg,
+.category-item.active .delete-btn svg {
+  fill: var(--primary-color);
+}
+
+/* --- Content --- */
+.content {
+  flex: 1; /* flex-1 */
+  padding: 1.5rem; /* Increased padding */
+  position: relative;
+  width: 100%; /* Ensure full width */
+  box-sizing: border-box; /* Make sure padding doesn't add to width */
+  overflow-x: hidden; /* Prevent horizontal scrolling */
+  display: flex;
+  flex-direction: column;
+  background-color: var(--bg-dark);
+}
+
+#categoryTitle {
+  font-size: 1.5rem; /* text-2xl */
+  margin-bottom: 1rem; /* mb-4 */
+  color: var(--text-light);
+  font-weight: 600; /* font-semibold */
+  padding-left: 0; /* Remove padding */
+  padding-right: 0; /* Remove padding */
+  width: 100%; /* Ensure full width */
+}
+
+#channelList {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem; /* Increased gap */
+  padding-left: 0; /* Remove left padding */
+  padding-right: 0; /* Remove right padding */
+  margin-bottom: 4rem; /* Space for the button at bottom */
+  width: 100%; /* Ensure full width of parent */
+  max-width: 100%; /* Prevent overflow */
+}
+
+.urlList {
+  list-style: none;
+  padding: 0;
+  width: 100%;
+  max-width: 100%;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1rem;
+}
+
+/* URL item styles */
+.url-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--bg-card);
+  padding: 1rem; /* Increased padding */
+  border-radius: 0.75rem; /* Increased rounded corners */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  margin: 0;
+  box-sizing: border-box;
+  max-width: 100%;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  transition: all 0.2s ease;
+}
+
+.url-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  border-color: rgba(232, 107, 92, 0.3);
+}
+
+.url-link {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding-right: 0.75rem; /* Add space between link text and buttons */
+  width: 100%;
+  max-width: calc(100% - 70px); /* Reserve space for the action buttons */
+  color: #e0e0ff;
+  font-weight: 500;
+}
+
+.url-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.url-item .action-btn svg {
+  fill: #a3a3ff;
+  width: 16px;
+  height: 16px;
+}
+
+.url-item .action-btn:hover svg {
+  fill: var(--primary-color);
+}
+
+#channelList li a {
+  color: var(--primary-color);
+  text-decoration: none;
+  word-break: break-all; /* break-all */
+  font-weight: 500;
+}
+
+#channelList li a:hover {
+  text-decoration: underline; /* hover:underline */
+}
+
+#addChannelBtn {
+  position: fixed; /* fixed instead of absolute for consistent positioning */
+  right: 2rem; /* right-8 */
+  bottom: 2rem; /* bottom-8 */
+  padding: 0.75rem 1.25rem; /* Increased padding */
+  font-size: 1rem;
+  border: none;
+  border-radius: 9999px; /* rounded-full */
+  background: var(--button-highlight); /* Changed from primary-color to button-highlight */
+  color: #000; /* Changed to black for better contrast with green */
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 10px 15px -3px rgba(74, 222, 128, 0.4),
+    0 4px 6px -2px rgba(74, 222, 128, 0.2); /* Updated shadow color */
+  z-index: 100; /* Ensure button is above other elements */
+}
+
+#addChannelBtn:hover {
+  background: #2ebd63; /* Darker green on hover */
+  transform: scale(1.05);
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* Confirm dialog */
+.confirm-dialog {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.dialog-content {
+  background: var(--bg-card);
+  padding: 24px;
+  border-radius: 12px;
+  width: 320px;
+  max-width: 90%;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  color: var(--text-light);
+}
+
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.dialog-btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.confirm-btn {
+  background: var(--primary-color);
+  color: white;
+}
+
+.cancel-btn {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-light);
+}
+
+/* Debug panel */
+#debugPanel {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  max-height: 200px;
+  overflow-y: auto;
+  background: rgba(15, 23, 42, 0.95);
+  color: #fff;
+  font-size: 12px;
+  font-family: monospace;
+  padding: 10px;
+  z-index: 999;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.debug-info {
+  margin-bottom: 12px;
+  padding: 8px;
+  border-left: 3px solid var(--primary-color);
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.debug-info h4 {
+  margin: 0 0 8px 0;
+  color: #818cf8;
+}
+
+.debug-info p {
+  margin: 4px 0;
+}
+
+/* Toast notification */
+.toast-notification {
+  /* Modify position to be off-screen initially */
+  position: fixed;
+  bottom: -100px; /* Start off-screen */
+  right: 20px;
+  padding: 12px 24px;
+  background-color: var(--bg-card);
+  color: var(--text-light);
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
+  opacity: 0;
+  transition: opacity 0.3s, bottom 0.3s;
+  border-left: 4px solid var(--primary-color);
+}
+
+.toast-notification.show {
+  opacity: 1;
+  bottom: 20px; /* Move on-screen when shown */
+}
+
+.toast-error {
+  border-left-color: #ef4444;
+}
+
+.toast-success {
+  border-left-color: #10b981;
+}
+
+.toast-warning {
+  border-left-color: #f59e0b;
+}
+
+/* Modal Overlay and Dialog */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  backdrop-filter: blur(3px);
+}
+
+.modal-dialog {
+  background: var(--bg-card);
+  color: var(--text-light);
+  padding: 28px;
+  border-radius: 16px;
+  width: 400px;
+  max-width: 90%;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.modal-content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.modal-content h3 {
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0;
+  color: var(--text-light);
+}
+
+.modal-input {
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  background: #ffffff;
+  color: #333333;
+  font-size: 16px;
+  width: 100%;
+}
+
+.modal-input::placeholder {
+  color: #999999;
+}
+
+.modal-input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.btn {
+  padding: 10px 24px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.ok-btn {
+  background: var(--primary-color);
+  color: white;
+}
+
+.ok-btn:hover {
+  background: var(--secondary-color);
+  transform: translateY(-1px);
+}
+
+.cancel-btn {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-light);
+}
+
+.cancel-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* Warning button style */
+.warning-btn {
+  background: #f59e0b; /* amber-500 */
+  color: white;
+}
+
+.warning-btn:hover {
+  background: #f97316; /* orange-500 */
+}
+
+.sync-status {
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  background-color: rgba(255, 255, 255, 0.05);
+  color: var(--text-muted);
+  display: inline-block;
+}
+
+.sync-status.connected {
+  color: #4ade80;
+}
+
+.sync-status.error {
+  color: #f87171;
+}
+
+.retry-btn {
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 2px 8px;
+  font-size: 12px;
+  cursor: pointer;
+  margin-left: 8px;
+}
+
+.retry-btn:hover {
+  background-color: var(--secondary-color);
+}
+
+/* Database diagnostic tools */
+.sync-tooltip {
+  display: none;
+  font-size: 12px;
+  margin-top: 5px;
+  padding: 8px 12px;
+  background-color: rgba(255, 255, 255, 0.05);
+  border-radius: 6px;
+  border-left: 3px solid var(--primary-color);
+}
+
+.sync-tooltip a {
+  color: var(--primary-color);
+  text-decoration: none;
+}
+
+.sync-tooltip a:hover {
+  text-decoration: underline;
+}
+
+/* Show tooltip when there's an error */
+.header:hover .sync-tooltip,
+.sync-status:hover + .sync-tooltip {
+  display: block;
+}
+
+/* Add styles for the JSON popup */
+#jsonDataPopup {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  z-index: 10000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  backdrop-filter: blur(3px);
+}
+
+#jsonDataPopup .modal-dialog {
+  background-color: var(--bg-card);
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  max-width: 80%;
+  max-height: 90%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+#jsonDataPopup .modal-content {
+  padding: 24px;
+  overflow-y: auto;
+}
+
+#jsonDataPopup h3 {
+  margin-top: 0;
+  color: var(--primary-color);
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+#jsonDataPopup pre {
+  background-color: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  padding: 15px;
+  font-family: monospace;
+  font-size: 14px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-x: auto;
+  color: var(--text-light);
+}
+
+#jsonDataPopup .modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+#jsonDataPopup button {
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  border: none;
+  font-weight: 500;
+}
+
+#jsonDataPopup button.secondary-btn {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: var(--text-light);
+}
+
+#jsonDataPopup button.ok-btn {
+  background-color: var(--primary-color);
+  color: white;
+}
+
+#jsonDataPopup button:hover {
+  opacity: 0.9;
+}
+
+/* Card styles for dashboard elements */
+.card {
+  background: var(--bg-card);
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  transition: all 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  border-color: rgba(232, 107, 92, 0.3);
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.card-title {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--text-muted);
+}
+
+.card-value {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text-light);
+}
+
+/* Dashboard grid layout */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+/* Stats cards with colored accents */
+.stat-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.stat-card.primary {
+  border-left: 4px solid var(--primary-color);
+}
+
+.stat-card.success {
+  border-left: 4px solid #10b981;
+}
+
+.stat-card.warning {
+  border-left: 4px solid #f59e0b;
+}
+
+.stat-card.info {
+  border-left: 4px solid #0ea5e9;
+}
+
+/* Chart container */
+.chart-container {
+  background: var(--bg-card);
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 20px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.chart-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-light);
+}
+
+/* Tabs for dashboard sections */
+.tabs {
+  display: flex;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  margin-bottom: 20px;
+}
+
+.tab {
+  padding: 12px 20px;
+  cursor: pointer;
+  color: var(--text-muted);
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s;
+}
+
+.tab:hover {
+  color: var(--text-light);
+}
+
+.tab.active {
+  color: var(--primary-color);
+  border-bottom-color: var(--primary-color);
+}
+
+/* Add styles for YouTube search button */
+.youtube-search-btn {
+  background-color: #e62117;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 8px 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.youtube-search-btn:hover {
+  background-color: #c81c0e;
+}

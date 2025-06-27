@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyTV Database Diagnostics</title>
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            line-height: 1.6;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            color: #333;
+        }
+        h1 {
+            color: #2563eb;
+        }
+        .status {
+            padding: 12px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+        .info {
+            background-color: #dbeafe;
+            color: #1e40af;
+        }
+        .error {
+            background-color: #fee2e2;
+            color: #b91c1c;
+        }
+        .success {
+            background-color: #dcfce7;
+            color: #166534;
+        }
+        .table-status {
+            margin-bottom: 20px;
+            padding: 15px;
+            border-radius: 8px;
+        }
+        .table-status.error {
+            background-color: #fee2e2;
+            border-left: 4px solid #b91c1c;
+        }
+        .table-status.success {
+            background-color: #dcfce7;
+            border-left: 4px solid #166534;
+        }
+        #error {
+            display: none;
+            padding: 15px;
+            border-radius: 8px;
+            background-color: #fee2e2;
+            margin-top: 20px;
+        }
+        #error pre {
+            background-color: #1f2937;
+            color: #f9fafb;
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+        button {
+            background-color: #2563eb;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-right: 10px;
+        }
+        button:hover {
+            background-color: #1d4ed8;
+        }
+        #fix-instructions {
+            display: none;
+            background-color: #fff7ed;
+            border-left: 4px solid #ea580c;
+            padding: 15px;
+            margin-top: 20px;
+        }
+    </style>
+    
+    <!-- Supabase with onload event and fallback -->
+    <script>
+        // Track Supabase loading status
+        window.supabaseLoaded = false;
+        window.supabaseLoadError = false;
+
+        function onSupabaseLoad() {
+            window.supabaseLoaded = true;
+            console.log("Supabase script loaded!");
+        }
+
+        function onSupabaseError() {
+            window.supabaseLoadError = true;
+            console.error("Primary Supabase script failed to load, trying fallback...");
+
+            // Create fallback script
+            const fallbackScript = document.createElement("script");
+            fallbackScript.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js";
+            fallbackScript.onload = function() {
+                window.supabaseLoaded = true;
+                console.log("Fallback Supabase script loaded successfully!");
+            };
+            fallbackScript.onerror = function() {
+                console.error("Both Supabase script sources failed to load");
+            };
+
+            // Add to document
+            document.head.appendChild(fallbackScript);
+        }
+    </script>
+
+    <!-- Primary supabase script -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" onload="onSupabaseLoad()" onerror="onSupabaseError()"></script>
+    
+    <!-- Database check script -->
+    <script src="database-check.js"></script>
+</head>
+<body>
+    <h1>MyTV Database Diagnostics</h1>
+    
+    <div id="status" class="status info">Initializing...</div>
+    
+    <div id="tables"></div>
+    
+    <div id="error"></div>
+    
+    <div id="fix-instructions">
+        <h3>Database Structure Fix Required</h3>
+        <p>Your Supabase database appears to be missing required tables or has an incorrect structure.</p>
+        <p>To fix this issue:</p>
+        <div>
+            <button onclick="window.open('database-fix.html', '_blank')">Open Fix Guide</button>
+            <button onclick="window.location.reload()">Recheck Connection</button>
+        </div>
+    </div>
+    
+    <hr>
+    
+    <div>
+        <h3>Database Optimization</h3>
+        <p>If your database is experiencing performance issues with many columns, you can simplify the structure:</p>
+        <button onclick="window.open('database-fix-minimal.html', '_blank')">Simplify Database Structure</button>
+        <p><small>This will reduce the video table to only essential columns (id, category_id, url) while preserving functionality.</small></p>
+    </div>
+    
+    <hr>
+    
+    <p>After successfully fixing the database structure, return to the <a href="index.html">main application</a>.</p>
+</body>
+</html> 

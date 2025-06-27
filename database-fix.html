@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyTV Database Fix</title>
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            line-height: 1.6;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            color: #333;
+        }
+        h1 {
+            color: #2563eb;
+        }
+        .step {
+            margin-bottom: 20px;
+            padding: 15px;
+            border-left: 4px solid #2563eb;
+            background-color: #f9fafb;
+        }
+        code {
+            background-color: #e5e7eb;
+            padding: 2px 4px;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+        pre {
+            background-color: #1f2937;
+            color: #f9fafb;
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+        }
+        .sql-content {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        button {
+            background-color: #2563eb;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        button:hover {
+            background-color: #1d4ed8;
+        }
+        .copy-notification {
+            display: none;
+            color: #059669;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>MyTV Database Fix</h1>
+    
+    <p>This guide will help you fix the database structure issues in your Supabase project.</p>
+    
+    <div class="step">
+        <h2>Step 1: Log in to your Supabase dashboard</h2>
+        <p>Go to <a href="https://app.supabase.io" target="_blank">https://app.supabase.io</a> and sign in to access your project.</p>
+    </div>
+    
+    <div class="step">
+        <h2>Step 2: Access the SQL Editor</h2>
+        <p>Once logged in, navigate to your project, then click on "SQL Editor" in the left sidebar.</p>
+    </div>
+    
+    <div class="step">
+        <h2>Step 3: Create a new query</h2>
+        <p>Click on "New Query" to open a blank SQL editor.</p>
+    </div>
+    
+    <div class="step">
+        <h2>Step 4: Copy and paste the following SQL</h2>
+        <p>Copy the SQL below and paste it into the Supabase SQL editor:</p>
+        <div>
+            <button id="copyBtn">Copy SQL</button>
+            <span id="copyNotification" class="copy-notification">Copied to clipboard!</span>
+        </div>
+        <div class="sql-content">
+            <pre id="sqlContent">-- This script fixes the Supabase database structure for MyTV app
+
+-- First, create the categories table if it doesn't exist
+CREATE TABLE IF NOT EXISTS public.categories (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name TEXT NOT NULL UNIQUE,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT now()
+);
+
+-- Then create the video table with proper references
+-- Drop the existing table if it has issues
+DROP TABLE IF EXISTS public.video;
+
+-- Create the video table with the proper structure
+CREATE TABLE public.video (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    category_id UUID NOT NULL REFERENCES public.categories(id) ON DELETE CASCADE,
+    url TEXT NOT NULL,
+    title TEXT,
+    author_name TEXT,
+    author_url TEXT,
+    type TEXT,
+    height INTEGER,
+    width INTEGER,
+    version TEXT,
+    provider_name TEXT,
+    -- provider_url column has been merged with url
+    thumbnail_url TEXT,
+    thumbnail_height INTEGER,
+    thumbnail_width INTEGER,
+    html TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT now()
+);
+
+-- Add indexes for better performance
+CREATE INDEX IF NOT EXISTS video_category_id_idx ON public.video(category_id);
+CREATE INDEX IF NOT EXISTS video_url_idx ON public.video(url);
+
+-- Enable Row Level Security (RLS)
+ALTER TABLE public.categories ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.video ENABLE ROW LEVEL SECURITY;
+
+-- Create RLS policies (allow all operations for now)
+CREATE POLICY "Allow all categories operations" ON public.categories FOR ALL USING (true);
+CREATE POLICY "Allow all video operations" ON public.video FOR ALL USING (true);
+
+-- Grant access to the anon role
+GRANT ALL ON public.categories TO anon;
+GRANT ALL ON public.video TO anon;
+GRANT ALL ON public.categories TO authenticated;
+GRANT ALL ON public.video TO authenticated;</pre>
+        </div>
+    </div>
+    
+    <div class="step">
+        <h2>Step 5: Run the SQL query</h2>
+        <p>Click the "Run" button in the Supabase SQL Editor to execute the query.</p>
+        <p>This will:</p>
+        <ul>
+            <li>Create the <code>categories</code> table if it doesn't exist</li>
+            <li>Drop and recreate the <code>video</code> table with the correct structure</li>
+            <li>Set up proper foreign key relationships</li>
+            <li>Add performance indexes</li>
+            <li>Configure permissions for anonymous and authenticated users</li>
+        </ul>
+    </div>
+    
+    <div class="step">
+        <h2>Step 6: Restart your application</h2>
+        <p>After successfully executing the SQL, refresh your MyTV application in the browser.</p>
+        <p>You should no longer see the error messages about missing relations or tables.</p>
+    </div>
+
+    <script>
+        document.getElementById('copyBtn').addEventListener('click', function() {
+            const sqlText = document.getElementById('sqlContent').textContent;
+            navigator.clipboard.writeText(sqlText).then(function() {
+                const notification = document.getElementById('copyNotification');
+                notification.style.display = 'inline';
+                setTimeout(function() {
+                    notification.style.display = 'none';
+                }, 2000);
+            });
+        });
+    </script>
+    
+    <!-- Example code for inserting video correctly -->
+    <script>
+        // This is example code for correctly inserting video into Supabase
+        /*
+        // Check if required fields are defined
+        if (!metadata.title || !originalYoutubeUrl) {
+          console.error("Missing data: ", metadata.title, originalYoutubeUrl);
+          return;
+        }
+        
+        // Create proper video data object
+        const videoData = {
+          id: crypto.randomUUID(), // Generate a random UUID
+          category_id: categoryId,
+          title: metadata.title,
+          url: originalYoutubeUrl,
+          html: metadata.html || null,
+          author_name: metadata.author_name || null,
+          thumbnail_url: metadata.thumbnail_url || null,
+          provider_name: metadata.provider_name || null
+        };
+        
+        console.log("Sending to Supabase:", videoData);
+        
+        // Now use the correct table name "video" (not "videos")
+        const { data, error } = await supabase.from("video").insert(videoData);
+        
+        if (error) {
+          console.error("Error inserting video:", error);
+        } else {
+          console.log("Video inserted successfully:", data);
+        }
+        */
+    </script>
+</body>
+</html> 

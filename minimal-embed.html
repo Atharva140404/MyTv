@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Add YouTube Video</title>
+  <style>
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    
+    select, input, button {
+      display: block;
+      width: 100%;
+      padding: 8px 12px;
+      margin-bottom: 15px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+    
+    button {
+      background-color: #0d6efd;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    
+    #status {
+      padding: 10px;
+      border-radius: 4px;
+    }
+    
+    .success {
+      background-color: #d1e7dd;
+      color: #0f5132;
+    }
+    
+    .error {
+      background-color: #f8d7da;
+      color: #842029;
+    }
+  </style>
+</head>
+<body>
+  <h2>Add YouTube Video</h2>
+  
+  <select id="categorySelect">
+    <option value="">Select a category</option>
+    <!-- Categories will be populated dynamically -->
+  </select>
+  
+  <input type="text" id="youtubeUrl" placeholder="Paste YouTube URL" />
+  
+  <button onclick="addVideo()">Add Video</button>
+  
+  <p id="status"></p>
+
+  <!-- Supabase JS and your script.js -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+  <script src="script.js"></script>
+  
+  <script>
+    // Initialize the category dropdown when the page loads
+    document.addEventListener('DOMContentLoaded', function() {
+      updateCategoryDropdown();
+    });
+    
+    // Function to add a video
+    function addVideo() {
+      const categorySelect = document.getElementById('categorySelect');
+      const youtubeUrl = document.getElementById('youtubeUrl');
+      const status = document.getElementById('status');
+      
+      // Reset status
+      status.textContent = '';
+      status.className = '';
+      
+      // Validate inputs
+      if (!categorySelect.value) {
+        status.textContent = 'Please select a category';
+        status.className = 'error';
+        return;
+      }
+      
+      if (!youtubeUrl.value.trim()) {
+        status.textContent = 'Please enter a YouTube URL';
+        status.className = 'error';
+        return;
+      }
+      
+      // Set form values for the existing script.js function
+      titleInput = ""; // Will be fetched from YouTube metadata
+      urlInput = youtubeUrl.value.trim();
+      authorInput = ""; // Will be fetched from YouTube metadata
+      selectedCategoryId = categorySelect.value;
+      
+      // Call the handleSubmit function from script.js
+      handleSubmit().then(() => {
+        // Clear the form
+        youtubeUrl.value = "";
+        
+        // Show success message
+        status.textContent = 'Video added successfully!';
+        status.className = 'success';
+      }).catch(error => {
+        console.error('Error adding video:', error);
+        status.textContent = 'Error adding video: ' + error.message;
+        status.className = 'error';
+      });
+    }
+    
+    // Function to update the category dropdown
+    function updateCategoryDropdown() {
+      const categorySelect = document.getElementById('categorySelect');
+      
+      // Clear existing options except the first placeholder
+      while (categorySelect.options.length > 1) {
+        categorySelect.remove(1);
+      }
+      
+      // Get Supabase instance from the global scope (set in script.js)
+      if (!window.supabase) {
+        console.error("Supabase client not initialized");
+        return;
+      }
+      
+      // Fetch categories from Supabase
+      window.supabase
+        .from("categories")
+        .select("id, name")
+        .then(({ data, error }) => {
+          if (error) {
+            console.error("Error fetching categories:", error);
+            return;
+          }
+          
+          if (data && data.length > 0) {
+            data.forEach(category => {
+              const option = document.createElement("option");
+              option.value = category.id;
+              option.textContent = category.name;
+              categorySelect.appendChild(option);
+            });
+          }
+        });
+    }
+  </script>
+</body>
+</html> 
